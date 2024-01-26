@@ -12,6 +12,9 @@ const getAll = async (req, res) => {
 
 const getSingle = async (req, res) => {
     //#swagger.tags=["Users"]
+    if (!ObjectId.isValid(req.params.id)) {
+        res.status(400).json('Must use a valid contact id to find a contact.');
+      }
     const userId = new ObjectId(req.params.id);
     const result = await mongodb.getDatabase().db().collection("users").find({_id: userId});
     result.toArray().then((users) => {
@@ -30,7 +33,7 @@ const createUser = async (req, res) => {
         birthday: req.body.birthday
     };
     const response = await mongodb.getDatabase().db().collection("users").insertOne(user);
-    if (response.acknowledge > 0) {
+    if (response.acknowledged > 0) {
         res.status(200).send();
     } else {
         res.status(500).json(response.error || "Some error occurred while updating the user.");
@@ -39,6 +42,10 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     //#swagger.tags=["Users"]
+    if (!ObjectId.isValid(req.params.id)) {
+        res.status(400).json('Must use a valid contact id to update a contact.');
+      }
+
     const userId = new ObjectId(req.params.id);
     const user = {
         email: req.body.email,
@@ -56,6 +63,11 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     //#swagger.tags=["Users"]
+
+    if (!ObjectId.isValid(req.params.id)) {
+    res.status(400).json('Must use a valid contact id to delete a contact.');
+    }
+
     const userId = new ObjectId(req.params.id);
     const response = await mongodb.getDatabase().db().collection("users").deleteOne({_id: userId}, true);
     if (response.deletedCount > 0) {
